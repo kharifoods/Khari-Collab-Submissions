@@ -220,7 +220,33 @@
         }
     </style>
 </head>
-<body class="antialiased font-sans selection:bg-brand-orange selection:text-white">
+<body class="antialiased font-sans selection:bg-brand-orange selection:text-white overflow-hidden">
+
+    <!-- SPLASH ENTRY PAGE -->
+    <div id="splashScreen" class="fixed inset-0 bg-brand-cream z-[100] flex flex-col items-center justify-center transition-all duration-1000 ease-in-out">
+        <!-- Floating shapes for vibe -->
+        <div class="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-brand-orange rounded-full opacity-10 blur-3xl animate-pulse-glow"></div>
+        <div class="absolute bottom-[10%] left-[-10%] w-[50vw] h-[50vw] bg-brand-lightbrown rounded-full opacity-10 blur-3xl animate-pulse-glow" style="animation-delay: 1s;"></div>
+
+        <div class="relative z-10 flex flex-col items-center text-center px-6">
+            <img src="https://raw.githubusercontent.com/kharifoods/Khari-Collab-Submissions/519ef917d35791a4cdbd57a1718555cd870ddec8/Khari%20Foods.png" alt="Khari Foods Logo" class="h-20 md:h-28 w-auto mb-10 drop-shadow-md animate-bounce-slight hover-target">
+            
+            <h1 class="font-display text-4xl md:text-5xl lg:text-6xl text-brand-brown mb-6 uppercase tracking-wide leading-tight">
+                Welcome <br> 
+                <span class="text-brand-orange">Influencers, Creators,<br>Students, Innovators</span>
+            </h1>
+            
+            <p class="font-sans text-xl md:text-2xl text-brand-lightbrown mb-12 font-medium tracking-wide">
+                We open a door where we can meet.
+            </p>
+            
+            <div class="magnetic-wrap hover-target">
+                <button id="enterDoorBtn" class="inline-block bg-brand-orange text-white px-12 py-5 rounded-full uppercase tracking-widest text-lg font-bold shadow-[0_10px_20px_rgba(244,121,32,0.3)] hover:bg-[#d96615] hover:shadow-lg transition-all duration-300 flex items-center gap-3">
+                    Open The Door <i class="fas fa-door-open"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom Cursor Dot -->
     <div class="cursor-dot hidden md:block" id="cursorDot"></div>
@@ -577,6 +603,33 @@
     </div>
 
     <script>
+        // --- Splash Entry Page Logic ---
+        const splashScreen = document.getElementById('splashScreen');
+        const enterDoorBtn = document.getElementById('enterDoorBtn');
+
+        enterDoorBtn.addEventListener('click', () => {
+            // Vibe Effect: Mini Confetti on Entry
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.6 },
+                    colors: ['#F47920', '#4A2511', '#FFF8F0', '#38A169'],
+                    zIndex: 101
+                });
+            }
+
+            // Slide up and fade out the splash screen
+            splashScreen.style.transform = 'translateY(-100vh)';
+            splashScreen.style.opacity = '0';
+            
+            // Allow scrolling on the main page after animation
+            setTimeout(() => {
+                document.body.classList.remove('overflow-hidden');
+                splashScreen.style.display = 'none';
+            }, 1000);
+        });
+
         // --- Vibe Lock Slider Logic ---
         const vibeSlider = document.getElementById('vibeSlider');
         const vibeFill = document.getElementById('vibeFill');
