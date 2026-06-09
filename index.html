@@ -382,7 +382,7 @@
                     <div class="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-bl-full -z-0"></div>
                     <div class="absolute bottom-0 left-0 w-32 h-32 bg-brand-orange/10 rounded-tr-full -z-0"></div>
 
-                    <div class="mb-12 text-center relative z-10">
+                    <div id="formHeader" class="mb-12 text-center relative z-10 transition-all duration-500">
                         <div class="inline-block bg-brand-brown/5 text-brand-orange px-4 py-1 rounded-full font-bold tracking-widest text-xs mb-4 uppercase">
                             Application Form
                         </div>
@@ -390,7 +390,7 @@
                         <p class="text-brand-lightbrown font-medium">Fill out the details below to request a collaboration.</p>
                     </div>
 
-                    <form id="collabForm" class="space-y-10 relative z-10">
+                    <form id="collabForm" class="space-y-10 relative z-10 transition-all duration-500">
                         
                         <!-- Section: Personal Details -->
                         <div class="bg-brand-cream/50 p-6 md:p-8 rounded-3xl border border-brand-brown/5 transition-colors hover:border-brand-orange/20">
@@ -560,6 +560,40 @@
                         </div>
 
                     </form>
+
+                    <!-- NEW: Interactive Success State (Hidden by default) -->
+                    <div id="successState" class="hidden relative z-10 flex flex-col items-center justify-center py-10 text-center opacity-0 transform translate-y-10 transition-all duration-700">
+                        <div class="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner animate-bounce-slight">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="inline-block bg-brand-brown/5 text-brand-orange px-4 py-1 rounded-full font-bold tracking-widest text-xs mb-4 uppercase">
+                            Vibe Check Passed
+                        </div>
+                        <h3 class="font-display text-5xl text-brand-brown mb-4">You're on the list!</h3>
+                        <p class="text-brand-lightbrown font-medium text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                            Your application has been securely locked in our vault. Our team will review your profile and drop an email in your inbox soon. Keep snacking!
+                        </p>
+                        
+                        <!-- Interactive Fun Element & Shop Button -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mt-4">
+                            <div class="magnetic-wrap hover-target">
+                                <button id="highFiveBtn" type="button" class="inline-flex items-center gap-3 border-2 border-brand-orange text-brand-orange bg-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-brand-orange hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg">
+                                    <i class="fas fa-hand-paper text-xl"></i> Give us a High Five!
+                                </button>
+                            </div>
+                            <div class="magnetic-wrap hover-target">
+                                <a href="https://kharifoods.com/collections/all" target="_blank" class="inline-flex items-center gap-3 bg-brand-orange text-white px-8 py-4 border-2 border-brand-orange rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#d96615] hover:border-[#d96615] transition-all duration-300 shadow-sm hover:shadow-lg">
+                                    <i class="fas fa-cookie-bite text-xl"></i> Let's snack a little bit
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Success Vibe Music -->
+                        <audio id="successMusic" preload="auto">
+                            <!-- Cheerful, upbeat royalty-free pop/lofi track from the Khari Foods repository -->
+                            <source src="https://raw.githubusercontent.com/kharifoods/Khari-Collab-Submissions/1860b6bff5082bc254f24519d3027603b9942095/taste_defined..mp3" type="audio/mpeg">
+                        </audio>
+                    </div>
                 </div>
             </div>
         </section>
@@ -868,11 +902,36 @@
                 });
 
                 if (response.ok) {
-                    // Success State
-                    showFormMessage("Awesome! Your request has been sent to our sheet. We'll reach out soon.", "success");
+                    // Success State - Smooth transition to Thank You screen
+                    const formHeader = document.getElementById('formHeader');
+                    formHeader.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    collabForm.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    
+                    setTimeout(() => {
+                        formHeader.style.display = 'none';
+                        collabForm.style.display = 'none';
+                        
+                        const successState = document.getElementById('successState');
+                        successState.classList.remove('hidden');
+                        
+                        // Small delay to allow display:block to apply before animating opacity
+                        setTimeout(() => {
+                            successState.classList.remove('opacity-0', 'translate-y-10');
+                            successState.classList.add('opacity-100', 'translate-y-0');
+                            
+                            // Play Success Vibe Music
+                            const successMusic = document.getElementById('successMusic');
+                            if (successMusic) {
+                                successMusic.volume = 0.4; // Set a pleasant volume
+                                successMusic.play().catch(e => console.log('Browser blocked audio autoplay:', e));
+                            }
+                        }, 50);
+                    }, 500);
+
+                    // We still clear the form in the background just in case
                     collabForm.reset();
                     
-                    // Reset Vibe Lock
+                    // Reset Vibe Lock in background
                     vibeUnlocked = false;
                     vibeSlider.value = 0;
                     vibeFill.style.width = '0%';
@@ -916,6 +975,47 @@
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
             } 
+        });
+
+        // --- High Five Interactive Logic ---
+        const highFiveBtn = document.getElementById('highFiveBtn');
+        let highFiveCount = 0;
+        
+        highFiveBtn.addEventListener('click', (e) => {
+            highFiveCount++;
+            
+            const rect = highFiveBtn.getBoundingClientRect();
+            // Calculate coordinates relative to viewport for the confetti origin
+            const x = (rect.left + rect.width / 2) / window.innerWidth;
+            const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: Math.min(40 + (highFiveCount * 10), 200), // Gets bigger each click, capped at 200
+                    spread: 60,
+                    origin: { x: x, y: y },
+                    colors: ['#F47920', '#38A169', '#FFF8F0', '#4A2511'],
+                    zIndex: 100,
+                    startVelocity: 30
+                });
+            }
+
+            // Interactive Text Changes based on clicks
+            if(highFiveCount === 1) {
+                highFiveBtn.innerHTML = '<i class="fas fa-heart text-xl"></i> High Fived!';
+                highFiveBtn.classList.add('bg-brand-orange', 'text-white');
+                highFiveBtn.classList.remove('text-brand-orange', 'bg-white');
+            } else if (highFiveCount === 5) {
+                highFiveBtn.innerHTML = '<i class="fas fa-fire text-xl"></i> OK, We feel the vibe!';
+            } else if (highFiveCount === 10) {
+                highFiveBtn.innerHTML = '<i class="fas fa-rocket text-xl"></i> VIBE OVERLOAD!';
+            }
+            
+            // Satisfying Pop effect
+            highFiveBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                highFiveBtn.style.transform = 'scale(1)';
+            }, 100);
         });
     </script>
 </body>
