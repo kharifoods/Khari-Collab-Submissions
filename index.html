@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khari Foods | Feel Good Snacking</title>
+    <title>The Khari Creator Collective</title>
     
     <!-- Fonts: Rum Raisin for playful headings, Poppins for clean body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +43,7 @@
                         'float': 'float 6s ease-in-out infinite',
                         'marquee': 'marquee 30s linear infinite',
                         'spin-slow': 'spin 15s linear infinite',
+                        'pulse-glow': 'pulseGlow 2s infinite',
                     },
                     keyframes: {
                         float: {
@@ -52,6 +53,10 @@
                         marquee: {
                             '0%': { transform: 'translateX(0%)' },
                             '100%': { transform: 'translateX(-50%)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(244, 121, 32, 0.4)' },
+                            '50%': { boxShadow: '0 0 0 15px rgba(244, 121, 32, 0)' },
                         }
                     }
                 }
@@ -61,10 +66,26 @@
 
     <!-- Custom CSS for subtle animations and form styling -->
     <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF8F0; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F47920; 
+            border-radius: 10px;
+            border: 2px solid #FFF8F0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d96615; 
+        }
+
         /* Hide default cursor for screens larger than mobile to use custom cursor */
         @media (min-width: 768px) {
             body { cursor: none; }
-            a, button, input, textarea, label { cursor: none; }
+            a, button, input, textarea, label, select { cursor: none; }
         }
 
         body {
@@ -171,12 +192,39 @@
             padding: 20px; /* capture area */
             margin: -20px;
         }
+
+        /* Changing Word Animation */
+        .word-fade {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+        .word-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Tilt Card smooth transition reset */
+        .tilt-card {
+            transition: transform 0.1s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        /* Range Slider for Vibe Lock */
+        #vibeSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 48px;
+            height: 48px;
+            background: transparent;
+            cursor: none;
+        }
     </style>
 </head>
 <body class="antialiased font-sans selection:bg-brand-orange selection:text-white">
 
     <!-- Custom Cursor Dot -->
     <div class="cursor-dot hidden md:block" id="cursorDot"></div>
+    <div id="trailContainer"></div>
 
     <nav class="fixed w-full z-50 transition-all duration-300 py-4" id="navbar">
         <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -205,20 +253,20 @@
             <div class="vibe-icon absolute bottom-1/3 left-[15%] text-brand-brown/15 text-4xl animate-float transition-transform duration-300 ease-out" style="animation-delay: 1.5s;"><i class="fas fa-heart"></i></div>
 
             <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
-                <div class="inline-block bg-brand-orange/10 text-brand-orange px-6 py-2 rounded-full font-bold tracking-widest text-sm mb-6 border border-brand-orange/20 hover:scale-105 transition-transform">
-                    FEEL GOOD SNACKING
+                <div class="inline-block bg-brand-orange text-white px-8 py-2 rounded-full font-bold tracking-widest text-sm mb-6 shadow-md hover:scale-105 transition-transform animate-pulse-glow">
+                    <i class="fas fa-star text-yellow-300 mr-2"></i> THE KHARI CREATOR COLLECTIVE
                 </div>
                 <h1 class="font-display text-6xl md:text-8xl text-brand-brown leading-tight mb-6">
-                    Open Happiness,<br> <span class="text-brand-orange">One Shell at a Time.</span>
+                    Open Happiness,<br> One <span id="changingWord" class="text-brand-orange inline-block min-w-[3em] text-center word-visible">Shell</span> at a Time.
                 </h1>
                 <p class="max-w-2xl mx-auto text-lg md:text-xl text-brand-lightbrown mb-10 font-medium">
-                    By balancing energy and warmth, we turn everyday snacks into feel-good moments that satisfy both hunger and happiness.
+                    We are building a community of creators who align with joyful, healthy living. Pass the vibe check and join the collective.
                 </p>
                 
                 <!-- Magnetic Button -->
                 <div class="magnetic-wrap hover-target">
                     <a href="#collab" id="magneticBtn" class="inline-block bg-brand-orange text-white px-10 py-4 rounded-full uppercase tracking-widest text-sm font-bold shadow-[0_10px_20px_rgba(244,121,32,0.3)] hover:bg-[#d96615] hover:shadow-lg transition-colors duration-300">
-                        Let's Collaborate
+                        Join The Collective
                     </a>
                 </div>
             </div>
@@ -269,48 +317,34 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-                    <!-- Card 1 -->
-                    <div class="bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-orange/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(244,121,32,0.08)] transition-all duration-300 group hover-target">
-                        <div class="w-16 h-16 bg-brand-orange text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-orange/20 transform group-hover:rotate-6 transition-transform duration-300">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10 items-stretch">
+                    <!-- Card 1 (Now with 3D Tilt) -->
+                    <div class="tilt-card h-full flex flex-col bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-orange/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(244,121,32,0.08)] group hover-target">
+                        <div class="w-16 h-16 bg-brand-orange text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-orange/20 transform group-hover:rotate-6 transition-transform duration-300 pointer-events-none translate-z-10">
                             <i class="fas fa-leaf"></i>
                         </div>
-                        <h3 class="font-display text-3xl text-brand-brown mb-4">100% Natural</h3>
-                        <p class="text-brand-lightbrown font-medium leading-relaxed">No artificial colors, no preservatives, and absolutely zero compromises. We bring you raw, whole ingredients straight from the earth.</p>
+                        <h3 class="font-display text-3xl text-brand-brown mb-4 pointer-events-none">100% Natural</h3>
+                        <p class="text-brand-lightbrown font-medium leading-relaxed pointer-events-none">No artificial colors, no preservatives, and absolutely zero compromises. We bring you raw, whole ingredients straight from the earth.</p>
                     </div>
 
-                    <!-- Card 2 -->
-                    <div class="bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-brown/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(74,37,17,0.08)] transition-all duration-300 md:mt-8 group hover-target">
-                        <div class="w-16 h-16 bg-brand-brown text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-brown/20 transform group-hover:-rotate-6 transition-transform duration-300">
+                    <!-- Card 2 (Now with 3D Tilt) -->
+                    <div class="tilt-card h-full flex flex-col bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-brown/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(74,37,17,0.08)] group hover-target">
+                        <div class="w-16 h-16 bg-brand-brown text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-brown/20 transform group-hover:-rotate-6 transition-transform duration-300 pointer-events-none">
                             <i class="fas fa-hand-holding-heart"></i>
                         </div>
-                        <h3 class="font-display text-3xl text-brand-brown mb-4">Handpicked Quality</h3>
-                        <p class="text-brand-lightbrown font-medium leading-relaxed">We carefully source and hand-sort our produce to ensure only the highest grade, crunchiest, and most flavorful nuts make it to your pack.</p>
+                        <h3 class="font-display text-3xl text-brand-brown mb-4 pointer-events-none">Handpicked Quality</h3>
+                        <p class="text-brand-lightbrown font-medium leading-relaxed pointer-events-none">We carefully source and hand-sort our produce to ensure only the highest grade, crunchiest, and most flavorful nuts make it to your pack.</p>
                     </div>
 
-                    <!-- Card 3 -->
-                    <div class="bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-orange/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(244,121,32,0.08)] transition-all duration-300 group hover-target">
-                        <div class="w-16 h-16 bg-brand-orange text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-orange/20 transform group-hover:rotate-6 transition-transform duration-300">
+                    <!-- Card 3 (Now with 3D Tilt) -->
+                    <div class="tilt-card h-full flex flex-col bg-brand-cream/40 p-10 rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-orange/30 hover:bg-white hover:shadow-[0_20px_50px_rgba(244,121,32,0.08)] group hover-target">
+                        <div class="w-16 h-16 bg-brand-orange text-white rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-lg shadow-brand-orange/20 transform group-hover:rotate-6 transition-transform duration-300 pointer-events-none">
                             <i class="fas fa-smile-beam"></i>
                         </div>
-                        <h3 class="font-display text-3xl text-brand-brown mb-4">Feel Good Snacking</h3>
-                        <p class="text-brand-lightbrown font-medium leading-relaxed">Our nutrient-dense superfoods balance warmth and energy, creating those perfect feel-good moments that satisfy both hunger and happiness.</p>
+                        <h3 class="font-display text-3xl text-brand-brown mb-4 pointer-events-none">Feel Good Snacking</h3>
+                        <p class="text-brand-lightbrown font-medium leading-relaxed pointer-events-none">Our nutrient-dense superfoods balance warmth and energy, creating those perfect feel-good moments that satisfy both hunger and happiness.</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section class="py-32 bg-brand-orange text-brand-cream relative overflow-hidden">
-            <!-- Decorative bubbly elements -->
-            <div class="absolute top-[-20%] right-[-10%] w-96 h-96 bg-white/10 rounded-full blur-2xl"></div>
-            <div class="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-brand-brown/10 rounded-full blur-2xl"></div>
-            
-            <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-                <i class="fa-solid fa-face-smile-wink text-6xl text-brand-brown mb-6 hover-target hover:scale-110 transition-transform cursor-pointer"></i>
-                <h2 class="font-display text-6xl md:text-7xl mb-6 hover-target">Let's do something <br><span class="text-brand-brown">cool and crazy.</span></h2>
-                <p class="text-xl md:text-2xl font-medium text-brand-cream max-w-2xl mx-auto mb-10">
-                    Are you a creator who aligns with joyful, healthy living? We are always on the lookout for passionate voices to build something extraordinary together.
-                </p>
             </div>
         </section>
 
@@ -323,8 +357,11 @@
                     <div class="absolute bottom-0 left-0 w-32 h-32 bg-brand-orange/10 rounded-tr-full -z-0"></div>
 
                     <div class="mb-12 text-center relative z-10">
-                        <h3 class="font-display text-4xl text-brand-brown mb-3">Collab with Us!</h3>
-                        <p class="text-brand-lightbrown font-medium">Fill out the details below and our team will get back to you.</p>
+                        <div class="inline-block bg-brand-brown/5 text-brand-orange px-4 py-1 rounded-full font-bold tracking-widest text-xs mb-4 uppercase">
+                            Application Form
+                        </div>
+                        <h3 class="font-display text-4xl text-brand-brown mb-3">Join The Collective!</h3>
+                        <p class="text-brand-lightbrown font-medium">Fill out the details below to request a collaboration.</p>
                     </div>
 
                     <form id="collabForm" class="space-y-10 relative z-10">
@@ -357,25 +394,69 @@
                                     <input type="url" id="profileLink" name="profileLink" required class="premium-input" placeholder="Primary Social Media Link (Instagram/YouTube)">
                                 </div>
                                 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div class="hover-target">
                                         <input type="number" id="followers" name="followers" required class="premium-input" placeholder="Total Followers">
                                     </div>
                                     <div class="hover-target">
                                         <input type="number" id="avgViews" name="avgViews" required class="premium-input" placeholder="Avg Views per Post">
                                     </div>
+                                    <div class="hover-target relative flex items-center">
+                                        <input type="number" step="0.1" id="engagementRate" name="engagementRate" required class="premium-input pr-10" placeholder="Engagement Rate (%)">
+                                        <div class="absolute right-4 group">
+                                            <i class="fas fa-info-circle text-brand-orange/60 hover:text-brand-orange transition-colors cursor-help"></i>
+                                            <!-- Tooltip -->
+                                            <div class="absolute bottom-full right-[-10px] mb-2 w-48 p-3 bg-brand-dark text-brand-cream text-xs font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 pointer-events-none shadow-xl border border-white/10 z-[100] leading-relaxed">
+                                                Calculated as: <br><span class="font-bold text-brand-orange">(Avg Likes + Comments) ÷ Followers × 100</span>
+                                                <div class="absolute top-full right-[10px] border-4 border-transparent border-t-brand-dark"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="hover-target relative">
+                                    <select id="contentFormat" name="contentFormat" required class="premium-input appearance-none cursor-pointer w-full text-brand-brown">
+                                        <option value="" disabled selected>What type of content performs best for you?</option>
+                                        <option value="Aesthetic Recipe Videos">Aesthetic Recipe Videos</option>
+                                        <option value="Fitness/Diet Vlogs">Fitness/Diet Vlogs</option>
+                                        <option value="ASMR Unboxings">ASMR Unboxings</option>
+                                        <option value="Lifestyle Reels">Lifestyle Reels</option>
+                                        <option value="Informational/Nutrition">Informational/Nutrition content</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none text-brand-orange">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="hover-target">
+                                        <textarea id="audienceType" name="audienceType" required rows="2" class="premium-input resize-none" placeholder="Describe your audience (e.g., Fitness enthusiasts, students...)"></textarea>
+                                    </div>
+                                    <div class="hover-target">
+                                        <textarea id="audienceGeo" name="audienceGeo" required rows="2" class="premium-input resize-none" placeholder="Top Audience Locations (e.g., Delhi, Mumbai, USA)"></textarea>
+                                    </div>
                                 </div>
 
                                 <div class="hover-target">
-                                    <textarea id="audienceType" name="audienceType" required rows="2" class="premium-input resize-none" placeholder="Describe your audience (e.g., Fitness enthusiasts, students...)"></textarea>
+                                    <input type="url" id="mediaKit" name="mediaKit" class="premium-input" placeholder="Media Kit / Portfolio Link (Optional)">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: The Vibe Check -->
+                        <div class="bg-brand-cream/50 p-6 md:p-8 rounded-3xl border border-brand-brown/5 transition-colors hover:border-brand-orange/20">
+                            <h4 class="text-sm uppercase tracking-widest text-brand-orange font-bold mb-6 flex items-center gap-2">
+                                <i class="fas fa-heart"></i> 03. The Vibe Check
+                            </h4>
+                            <div class="hover-target">
+                                <textarea id="vibeCheck" name="vibeCheck" required rows="3" class="premium-input resize-none" placeholder="Why do you want to collaborate with Khari Foods? What does 'Feel Good Snacking' mean to you?"></textarea>
                             </div>
                         </div>
 
                         <!-- Section: Collaboration Preference -->
                         <div class="bg-brand-cream/50 p-6 md:p-8 rounded-3xl border border-brand-brown/5 transition-colors hover:border-brand-orange/20">
                             <h4 class="text-sm uppercase tracking-widest text-brand-orange font-bold mb-2 flex items-center gap-2">
-                                <i class="fas fa-handshake"></i> 03. How things gonna work?
+                                <i class="fas fa-handshake"></i> 04. How things gonna work?
                             </h4>
                             <p class="text-sm text-brand-lightbrown mb-6 font-medium">Select your preferred mode of collaboration:</p>
                             
@@ -409,10 +490,36 @@
                         <!-- Section: Logistics -->
                         <div class="bg-brand-cream/50 p-6 md:p-8 rounded-3xl border border-brand-brown/5 transition-colors hover:border-brand-orange/20">
                             <h4 class="text-sm uppercase tracking-widest text-brand-orange font-bold mb-6 flex items-center gap-2">
-                                <i class="fas fa-box-open"></i> 04. Logistics
+                                <i class="fas fa-box-open"></i> 05. Logistics
                             </h4>
                             <div class="hover-target">
                                 <textarea id="address" name="address" required rows="3" class="premium-input resize-none" placeholder="Complete Shipping Address (for PR packages & snacks!)"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Section Vibe Lock -->
+                        <div class="bg-brand-cream p-6 md:p-8 rounded-3xl border-2 border-brand-orange/30 transition-colors shadow-inner">
+                            <h4 class="text-sm uppercase tracking-widest text-brand-orange font-bold mb-2 flex items-center gap-2">
+                                <i class="fas fa-lock-open"></i> 06. The Vibe Lock
+                            </h4>
+                            <p class="text-sm text-brand-lightbrown mb-6 font-medium">Slide to prove you match our frequency and unlock the application.</p>
+                            
+                            <div class="relative w-full h-14 bg-white rounded-full border-2 border-brand-brown/10 overflow-hidden flex items-center hover-target shadow-inner">
+                                <!-- Progress Fill -->
+                                <div id="vibeFill" class="absolute top-0 left-0 h-full bg-gradient-to-r from-brand-orange to-yellow-400 w-0 transition-all duration-75 ease-linear"></div>
+                                
+                                <!-- Slider Input -->
+                                <input type="range" id="vibeSlider" min="0" max="100" value="0" class="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer">
+                                
+                                <!-- Slider Text -->
+                                <div id="vibeText" class="absolute w-full text-center font-bold text-brand-brown pointer-events-none z-10 tracking-widest text-sm uppercase transition-colors">
+                                    Slide to 100% Vibe
+                                </div>
+                                
+                                <!-- Custom Thumb Visual -->
+                                <div id="vibeThumb" class="absolute left-2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-brand-orange pointer-events-none z-10 transition-transform shadow-[0_0_15px_rgba(244,121,32,0.3)]">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
                             </div>
                         </div>
 
@@ -420,9 +527,9 @@
                         <div id="formMessage" class="hidden p-4 rounded-2xl text-sm font-bold text-center"></div>
 
                         <!-- Submit Button -->
-                        <div class="pt-6 w-full magnetic-wrap hover-target">
-                            <button type="submit" id="submitBtn" class="w-full bg-brand-orange text-white py-6 px-4 rounded-full uppercase tracking-widest text-lg md:text-xl font-bold shadow-[0_10px_20px_rgba(244,121,32,0.3)] hover:bg-[#d96615] hover:shadow-lg transition-colors duration-300 flex justify-center items-center min-h-[4.5rem]">
-                                <span>Submit Application</span>
+                        <div class="pt-2 w-full magnetic-wrap hover-target">
+                            <button type="submit" id="submitBtn" disabled class="w-full bg-gray-300 text-gray-500 py-6 px-4 rounded-full uppercase tracking-widest text-lg md:text-xl font-bold transition-all duration-300 flex justify-center items-center min-h-[4.5rem] cursor-not-allowed opacity-60">
+                                <span id="submitBtnText"><i class="fas fa-lock mr-2"></i> Application Locked</span>
                             </button>
                         </div>
 
@@ -435,7 +542,7 @@
             <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 text-center sm:text-left">
                 <div class="sm:col-span-2 md:col-span-1">
                     <a href="#" class="block mb-6 flex justify-center sm:justify-start hover-target">
-                        <img src="https://raw.githubusercontent.com/kharifoods/Khari-Collab-Submissions/519ef917d35791a4cdbd57a1718555cd870ddec8/Khari%20Foods.png" alt="Khari Foods Logo" class="h-12 md:h-16 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity hover:scale-105 hover:rotate-1 transform">
+                        <img src="https://raw.githubusercontent.com/kharifoods/Khari-Collab-Submissions/519ef917d35791a4cdbd57a1718555cd870ddec8/Khari%20Foods.png" alt="Khari Foods Logo" class="h-12 md:h-16 w-auto drop-shadow-md transition-transform hover:scale-105 hover:rotate-2">
                     </a>
                     <p class="text-brand-cream/70 font-medium text-sm max-w-xs mx-auto sm:mx-0">Premium quality natural products, crafted for feel-good snacking and a happier lifestyle.</p>
                 </div>
@@ -470,16 +577,135 @@
     </div>
 
     <script>
-        // --- Custom Cursor Logic ---
+        // --- Vibe Lock Slider Logic ---
+        const vibeSlider = document.getElementById('vibeSlider');
+        const vibeFill = document.getElementById('vibeFill');
+        const vibeText = document.getElementById('vibeText');
+        const vibeThumb = document.getElementById('vibeThumb');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        let vibeUnlocked = false;
+
+        vibeSlider.addEventListener('input', (e) => {
+            if (vibeUnlocked) {
+                vibeSlider.value = 100; // Keep it locked once solved
+                return;
+            }
+            
+            const val = e.target.value;
+            vibeFill.style.width = val + '%';
+            
+            // Move custom thumb icon
+            const maxThumbMove = vibeSlider.clientWidth - 40; // width minus thumb width roughly
+            const thumbPos = (val / 100) * maxThumbMove;
+            vibeThumb.style.transform = `translateX(${thumbPos}px)`;
+
+            if (val < 100) {
+                vibeText.textContent = `${val}% Vibe Match`;
+                vibeText.classList.remove('text-white');
+                vibeText.classList.add('text-brand-brown');
+            }
+
+            if (val == 100) {
+                vibeUnlocked = true;
+                vibeText.textContent = "100% Vibe Matched! 🚀";
+                vibeText.classList.remove('text-brand-brown');
+                vibeText.classList.add('text-white');
+                vibeThumb.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+
+                // Unlock Submit Button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-60');
+                submitBtn.classList.add('bg-brand-orange', 'text-white', 'shadow-[0_10px_20px_rgba(244,121,32,0.3)]', 'hover:bg-[#d96615]', 'hover:shadow-lg');
+                submitBtnText.innerHTML = "Submit Application";
+                
+                // Mini celebration
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#F47920', '#FFF8F0'] });
+                }
+            }
+        });
+
+
+        // --- Dynamic Typing Effect ---
+        const words = ["Shell", "Crunch", "Smile", "Bite"];
+        let wordIndex = 0;
+        const changingWord = document.getElementById('changingWord');
+
+        setInterval(() => {
+            changingWord.classList.remove('word-visible');
+            changingWord.classList.add('word-fade');
+            
+            setTimeout(() => {
+                wordIndex = (wordIndex + 1) % words.length;
+                changingWord.textContent = words[wordIndex];
+                changingWord.classList.remove('word-fade');
+                changingWord.classList.add('word-visible');
+            }, 400); // Wait for fade out to complete
+        }, 2500); // Change word every 2.5 seconds
+
+        // --- 3D Tilt Effect on Cards ---
+        const tiltCards = document.querySelectorAll('.tilt-card');
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // Max rotation 10deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+                
+                // Disable transition during movement so it snaps instantly
+                card.style.transition = 'none';
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                // Re-enable smooth transition when mouse leaves
+                card.style.transition = 'transform 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease';
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            });
+        });
+
+        // --- Custom Cursor & Dust Trail Logic ---
         const cursorDot = document.getElementById('cursorDot');
-        const hoverTargets = document.querySelectorAll('.hover-target, a, button, input, textarea, label');
+        const trailContainer = document.getElementById('trailContainer');
+        const hoverTargets = document.querySelectorAll('.hover-target, a, button, input, textarea, label, select');
 
         // Only run cursor logic on non-touch devices
         if (window.matchMedia("(pointer: fine)").matches) {
             document.addEventListener('mousemove', (e) => {
-                // Smooth position update
+                // Smooth position update for main dot
                 cursorDot.style.left = e.clientX + 'px';
                 cursorDot.style.top = e.clientY + 'px';
+
+                // Spawn "Snack Dust" Trail
+                if(Math.random() > 0.8) { // Chance to spawn to prevent lagging
+                    const dust = document.createElement('div');
+                    dust.className = 'absolute bg-brand-orange rounded-full pointer-events-none z-[9998]';
+                    const size = Math.random() * 5 + 2; // 2px to 7px size
+                    dust.style.width = size + 'px';
+                    dust.style.height = size + 'px';
+                    // Need to account for scrolling for absolute positioned elements
+                    dust.style.left = (e.clientX + window.scrollX - size/2) + 'px';
+                    dust.style.top = (e.clientY + window.scrollY - size/2) + 'px';
+                    dust.style.opacity = '0.6';
+                    dust.style.transition = 'all 0.8s ease-out';
+                    
+                    trailContainer.appendChild(dust);
+                    
+                    // Trigger animation next frame
+                    requestAnimationFrame(() => {
+                        dust.style.transform = `translateY(${Math.random() * 30 + 10}px) scale(0)`;
+                        dust.style.opacity = '0';
+                    });
+                    
+                    // Cleanup DOM
+                    setTimeout(() => dust.remove(), 800);
+                }
             });
 
             hoverTargets.forEach(target => {
@@ -521,6 +747,7 @@
             if(!btn) return;
 
             wrap.addEventListener('mousemove', (e) => {
+                if (btn.disabled) return; // Don't attract if disabled
                 const rect = wrap.getBoundingClientRect();
                 const x = e.clientX - rect.left - rect.width / 2;
                 const y = e.clientY - rect.top - rect.height / 2;
@@ -549,11 +776,10 @@
 
         // --- Form Submission Logic for Google Sheets ---
         const collabForm = document.getElementById('collabForm');
-        const submitBtn = document.getElementById('submitBtn');
         const formMessage = document.getElementById('formMessage');
 
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyBBEmhvHLxQYi58Pgot7cbL4kQENBJ_ASXMGQS7T1ZKNM4PWQy3ipXssoVSKfJGp8/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw5cjlExkNh4w3w_uESSMtUOwlDfj_aBCSDShySJa9c7GoLjepbXBLa0aNxdWw7ilJ-/exec';
 
         function showFormMessage(msg, type) {
             formMessage.textContent = msg;
@@ -569,11 +795,8 @@
         collabForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Ensure you've added your Web App URL
-            if (scriptURL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showFormMessage("Setup required: Please add your Google Apps Script URL in the code.", "error");
-                return;
-            }
+            // Double check vibe lock
+            if(!vibeUnlocked) return;
 
             // Loading State
             const originalBtnContent = submitBtn.innerHTML;
@@ -596,9 +819,23 @@
                     showFormMessage("Awesome! Your request has been sent to our sheet. We'll reach out soon.", "success");
                     collabForm.reset();
                     
+                    // Reset Vibe Lock
+                    vibeUnlocked = false;
+                    vibeSlider.value = 0;
+                    vibeFill.style.width = '0%';
+                    vibeThumb.style.transform = `translateX(0px)`;
+                    vibeThumb.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    vibeText.textContent = 'Slide to 100% Vibe';
+                    vibeText.classList.remove('text-white');
+                    vibeText.classList.add('text-brand-brown');
+                    
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('bg-brand-orange', 'text-white', 'shadow-[0_10px_20px_rgba(244,121,32,0.3)]', 'hover:bg-[#d96615]', 'hover:shadow-lg');
+                    submitBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed', 'opacity-60');
+                    submitBtnText.innerHTML = '<i class="fas fa-lock mr-2"></i> Application Locked';
+
                     // Vibe Effect: Joyful Confetti Pop
                     if (typeof confetti === 'function') {
-                        // Fire from left edge
                         confetti({
                             particleCount: 100,
                             spread: 70,
@@ -606,7 +843,6 @@
                             colors: ['#F47920', '#4A2511', '#FFF8F0', '#38A169'],
                             zIndex: 100
                         });
-                        // Fire from right edge
                         confetti({
                             particleCount: 100,
                             spread: 70,
@@ -621,19 +857,12 @@
                 
             } catch (error) {
                 console.error("Submission Error:", error);
-                showFormMessage("Oops! Something went wrong while submitting. Please check your script URL or try again.", "error");
-            } finally {
-                // Restore Button State
+                showFormMessage("Oops! Something went wrong while submitting. Please check your network and try again.", "error");
+                // Restore Button State if error
                 submitBtn.innerHTML = originalBtnContent;
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-                
-                // Hide success message after 8 seconds
-                setTimeout(() => {
-                    formMessage.classList.add('hidden');
-                    formMessage.classList.remove('block');
-                }, 8000);
-            }
+            } 
         });
     </script>
 </body>
