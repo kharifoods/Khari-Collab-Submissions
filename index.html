@@ -415,12 +415,12 @@
                                         <input type="number" id="avgViews" name="avgViews" required class="premium-input" placeholder="Avg Views per Post">
                                     </div>
                                     <div class="hover-target relative flex items-center">
-                                        <input type="number" step="0.1" id="engagementRate" name="engagementRate" required class="premium-input pr-10" placeholder="Engagement Rate (%)">
+                                        <input type="number" step="0.1" id="engagementRate" name="engagementRate" required readonly class="premium-input pr-10 bg-brand-cream/50 cursor-not-allowed border-brand-brown/10 text-brand-orange font-bold" placeholder="Auto Engagement (%)">
                                         <div class="absolute right-4 group">
                                             <i class="fas fa-info-circle text-brand-orange/60 hover:text-brand-orange transition-colors cursor-help"></i>
                                             <!-- Tooltip -->
                                             <div class="absolute bottom-full right-[-10px] mb-2 w-48 p-3 bg-brand-dark text-brand-cream text-xs font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 pointer-events-none shadow-xl border border-white/10 z-[100] leading-relaxed">
-                                                Calculated as: <br><span class="font-bold text-brand-orange">(Avg Likes + Comments) ÷ Followers × 100</span>
+                                                Calculated automatically: <br><span class="font-bold text-brand-orange">(Avg Views ÷ Followers) × 100</span>
                                                 <div class="absolute top-full right-[10px] border-4 border-transparent border-t-brand-dark"></div>
                                             </div>
                                         </div>
@@ -482,11 +482,17 @@
                                     </div>
                                 </label>
 
-                                <label class="flex items-center space-x-4 cursor-pointer p-5 rounded-2xl bg-white border-2 border-transparent hover:border-brand-orange/30 transition-all shadow-sm hover-target hover:-translate-y-1">
-                                    <input type="radio" name="collabType" value="Paid" required class="radio-custom">
-                                    <div>
-                                        <span class="block font-bold text-brand-brown">Paid Campaign</span>
-                                        <span class="block text-sm text-brand-lightbrown mt-1">Commercial engagement for dedicated deliverables.</span>
+                                <!-- Locked Paid Campaign (Easter Egg) -->
+                                <label id="paidLabel" class="flex flex-col cursor-pointer p-5 rounded-2xl bg-gray-50 border-2 border-gray-200 transition-all shadow-sm opacity-70 relative select-none">
+                                    <div class="flex items-center space-x-4">
+                                        <input type="radio" name="collabType" value="Paid" id="paidRadio" disabled class="radio-custom disabled:cursor-not-allowed">
+                                        <div>
+                                            <span class="block font-bold text-gray-500" id="paidTitle"><i class="fas fa-lock mr-1"></i> Paid Campaign</span>
+                                            <span class="block text-sm text-gray-400 mt-1" id="paidDesc">Unlocks after 1 successful Barter.</span>
+                                        </div>
+                                    </div>
+                                    <div id="quotationWrap" class="hidden mt-4 pl-10">
+                                        <input type="text" id="quotation" name="quotation" class="premium-input text-sm py-2 border-brand-orange/50" placeholder="What is your quotation for it? (₹)">
                                     </div>
                                 </label>
 
@@ -557,12 +563,25 @@
                             Vibe Check Passed
                         </div>
                         <h3 class="font-display text-5xl text-brand-brown mb-4">You're on the list!</h3>
-                        <p class="text-brand-lightbrown font-medium text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                        <p class="text-brand-lightbrown font-medium text-lg mb-4 max-w-md mx-auto leading-relaxed">
                             Your application has been securely locked in our vault. Our team will review your profile and drop an email in your inbox soon. Keep snacking!
                         </p>
                         
+                        <!-- Action Required Box -->
+                        <div class="bg-brand-orange/10 border border-brand-orange/30 rounded-xl p-4 mb-8 max-w-lg mx-auto transform hover:scale-105 transition-transform duration-300 shadow-sm">
+                            <p class="text-brand-brown font-bold text-sm leading-relaxed">
+                                <i class="fas fa-bell text-brand-orange mr-2"></i> Action Required: <br>
+                                <span class="text-brand-lightbrown font-medium">Please send your Insta dashboard Google Drive link to the WhatsApp number provided below to complete your application.</span>
+                            </p>
+                        </div>
+
                         <!-- Interactive Fun Element & Shop Button -->
-                        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mt-4">
+                        <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 mt-2">
+                            <div class="magnetic-wrap hover-target">
+                                <a href="https://wa.me/917814288217?text=I%20have%20filled%20the%20form%20and%20will%20be%20providing%20the%20links%20of%20dashboard%20soon" target="_blank" class="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 border-2 border-[#25D366] rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#20b858] transition-all duration-300 shadow-sm hover:shadow-lg">
+                                    <i class="fab fa-whatsapp text-xl"></i> Send Dashboard
+                                </a>
+                            </div>
                             <div class="magnetic-wrap hover-target">
                                 <button id="highFiveBtn" type="button" class="inline-flex items-center gap-3 border-2 border-brand-orange text-brand-orange bg-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-brand-orange hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg">
                                     <i class="fas fa-hand-paper text-xl"></i> Give us a High Five!
@@ -802,6 +821,82 @@
         // --- Form Submission Logic for Google Sheets ---
         const collabForm = document.getElementById('collabForm');
         const formMessage = document.getElementById('formMessage');
+
+        // --- Automatic Engagement Calculation ---
+        const followersInput = document.getElementById('followers');
+        const viewsInput = document.getElementById('avgViews');
+        const engagementRateInput = document.getElementById('engagementRate');
+
+        function calculateEngagement() {
+            const f = parseFloat(followersInput.value);
+            const v = parseFloat(viewsInput.value);
+            if (f > 0 && v >= 0) {
+                const rate = ((v / f) * 100).toFixed(1);
+                engagementRateInput.value = rate;
+            } else {
+                engagementRateInput.value = '';
+            }
+        }
+        followersInput.addEventListener('input', calculateEngagement);
+        viewsInput.addEventListener('input', calculateEngagement);
+
+        // --- Secret Force Unlock Paid Campaign ---
+        const paidLabel = document.getElementById('paidLabel');
+        const paidRadio = document.getElementById('paidRadio');
+        const paidTitle = document.getElementById('paidTitle');
+        const paidDesc = document.getElementById('paidDesc');
+        const quotationWrap = document.getElementById('quotationWrap');
+        const quotationInput = document.getElementById('quotation');
+        
+        let paidClicks = 0;
+        let isPaidUnlocked = false;
+
+        paidLabel.addEventListener('click', (e) => {
+            if (isPaidUnlocked) return;
+            
+            // Prevent actual radio click while locked
+            if (e.target.tagName !== 'INPUT') e.preventDefault();
+
+            paidClicks++;
+            if (paidClicks < 3) {
+                // Shake hint
+                paidLabel.style.transform = 'translateX(5px)';
+                setTimeout(() => paidLabel.style.transform = 'translateX(-5px)', 100);
+                setTimeout(() => paidLabel.style.transform = 'translateX(0)', 200);
+            } else if (paidClicks === 3) {
+                // Easter Egg Unlocked!
+                isPaidUnlocked = true;
+                paidRadio.disabled = false;
+                
+                paidLabel.classList.remove('opacity-70', 'bg-gray-50', 'border-gray-200');
+                paidLabel.classList.add('bg-white', 'border-transparent', 'hover:border-brand-orange/30', 'hover:-translate-y-1', 'shadow-md', 'border-brand-orange/50');
+                
+                paidTitle.innerHTML = '<span class="text-brand-orange"><i class="fas fa-unlock mr-1"></i> Paid Campaign (Unlocked!)</span>';
+                paidDesc.innerHTML = '<span class="text-brand-brown font-medium">Commercial engagement. Give us your quotation below.</span>';
+                
+                paidRadio.checked = true;
+                quotationWrap.classList.remove('hidden');
+                quotationInput.required = true;
+                
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 }, colors: ['#F47920'] });
+                }
+            }
+        });
+
+        // Toggle Quotation visibility if user changes mind to Barter
+        const collabRadios = document.querySelectorAll('input[name="collabType"]');
+        collabRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'Paid' && isPaidUnlocked) {
+                    quotationWrap.classList.remove('hidden');
+                    quotationInput.required = true;
+                } else {
+                    quotationWrap.classList.add('hidden');
+                    quotationInput.required = false;
+                }
+            });
+        });
 
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
         const scriptURL = 'https://script.google.com/macros/s/AKfycbw5cjlExkNh4w3w_uESSMtUOwlDfj_aBCSDShySJa9c7GoLjepbXBLa0aNxdWw7ilJ-/exec';
